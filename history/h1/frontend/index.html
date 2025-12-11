@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jarvis Voice Assistant</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      max-width: 700px;
+      width: 90%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 42px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .status-indicator {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #dc3545;
+      display: inline-block;
+      margin-right: 10px;
+      animation: pulse 2s infinite;
+    }
+    
+    .status-indicator.active {
+      background: #28a745;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 15px 30px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1e3c72;
+      transition: all 0.3s;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      background: white;
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    button.danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    button.danger:hover:not(:disabled) {
+      background: #c82333;
+    }
+    
+    #status {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    #output {
+      min-height: 250px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      font-size: 16px;
+      color: #333;
+      line-height: 1.8;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .message {
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .message.user {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+    }
+    
+    .message.jarvis {
+      background: #f3e5f5;
+      border-left: 4px solid #9c27b0;
+    }
+    
+    .message.error {
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+    }
+    
+    .message-label {
+      font-weight: bold;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      opacity: 0.7;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+    }
+    
+    .mic-animation {
+      width: 100px;
+      height: 100px;
+      margin: 20px auto;
+      border-radius: 50%;
+      background: radial-gradient(circle, #2196f3 0%, #1e3c72 100%);
+      animation: micPulse 1.5s infinite;
+      display: none;
+    }
+    
+    .mic-animation.active {
+      display: block;
+    }
+    
+    @keyframes micPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 JARVIS</h1>
+    
+    <div id="status">
+      <span class="status-indicator" id="statusDot"></span>
+      <span id="statusText">Connecting to voice server...</span>
+    </div>
+    
+    <div class="mic-animation" id="micAnimation"></div>
+    
+    <div class="controls">
+      <button id="listenBtn">🎤 Listen Once</button>
+      <button id="startBtn">▶️ Start Continuous</button>
+      <button id="stopBtn" class="danger" disabled>⏹️ Stop</button>
+      <button id="speakBtn">🔊 Test Speech</button>
+    </div>
+    
+    <div id="output">
+      <div class="loading">Waiting for commands...</div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
