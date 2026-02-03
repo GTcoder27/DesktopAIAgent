@@ -1,8 +1,3 @@
-# DesktopAIAgent
-
-Based on the code files provided, here is a comprehensive `README.md` file for your **Desktop AI Agent** project.
-
----
 
 # Desktop AI Agent 🤖💻
 
